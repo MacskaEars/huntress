@@ -193,7 +193,11 @@ def decide_mode(args):
 
     # Ambiguous → ask once
     print("\nArguments could apply to jobs, housing, or both.")
-    choice = input("(j)obs, (a)partments, or (b)oth? [j]: ").lower()
+    try:
+        choice = input("(j)obs, (a)partments, or (b)oth? [j]: ").lower()
+    except (EOFError, OSError):
+        print("\nNo interactive input available — defaulting to jobs.")
+        choice = "j"
 
     if choice.startswith("a"):
         return ["apartments"]
