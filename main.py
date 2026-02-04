@@ -4,12 +4,26 @@ import os
 import time
 import re
 
+import subprocess
+import sys
+
+subprocess.check_call([
+    sys.executable, "-m", "pip", "install", "--upgrade", "pip"
+])
+
+subprocess.check_call([
+    sys.executable, "-m", "pip", "install",
+    "requests", "pandas", "numpy", "bs4"
+])
+import requests
+
+
 errs = {}
-try:
-    import requests
-except ImportError:
-    requests = None
-    errs["ip"] = "For IP-based location etc., try `pip install requests`"
+#try:
+#    import requests
+#except ImportError:
+#    requests = None
+#    errs["ip"] = "For IP-based location etc., try `pip install requests`"
 
 import pandas as pd
 
