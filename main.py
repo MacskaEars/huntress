@@ -7,18 +7,23 @@ import re
 import subprocess
 import sys
 
-subprocess.check_call([
-    sys.executable, "-m", "pip", "install", "--upgrade", "pip"
-])
-
-subprocess.check_call([
-    sys.executable, "-m", "pip", "install",
-    "requests", "pandas", "numpy", "bs4"
-])
-import requests
-
-
 errs = {}
+
+try:
+    subprocess.check_call([
+        sys.executable, "-m", "pip", "install", "--upgrade", "pip"
+    ])
+    
+    subprocess.check_call([
+        sys.executable, "-m", "pip", "install",
+        "requests", "pandas", "numpy", "bs4"
+    ])
+    import requests
+except Exception as e:
+    print(f"There was an exception installing requirements: {str(e)}")
+    return
+
+
 #try:
 #    import requests
 #except ImportError:
