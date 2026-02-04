@@ -11,11 +11,12 @@ except ImportError:
     requests = None
     errs["ip"] = "For IP-based location etc., try `pip install requests`"
 
-try:
-    import pandas as pd
-    from xhtml2pdf import pisa
-except ImportError:
-    errs["pdf"] = "For pdf support, try `pip install pandas xhtml2pdf`"
+import pandas as pd
+
+#try:
+#    from xhtml2pdf import pisa
+#except ImportError:
+#    errs["pdf"] = "For pdf support, try `pip install xhtml2pdf`"
 
 
 from jobs import run_job_search
@@ -137,14 +138,14 @@ a {{ color:#ff00ff; }}
     return path, html
 
 
-def generate_pdf(html, base):
-    if errs.get("pdf"):
-        print(errs["pdf"])
-        return None
-    path = f"{base}.pdf"
-    with open(path, "wb") as f:
-        pisa.CreatePDF(html, dest=f)
-    return path
+#def generate_pdf(html, base):
+#    if errs.get("pdf"):
+#        print(errs["pdf"])
+#        return None
+#    path = f"{base}.pdf"
+#    with open(path, "wb") as f:
+#        pisa.CreatePDF(html, dest=f)
+#    return path
 
 
 def generate_markdown(df, mode, base):
@@ -241,23 +242,30 @@ def run_and_output(modes, args):
         print(f"Saved: {base}.csv")
 
         # Decide formats
-        want_html = args.html or not (args.html or args.pdf or args.md or args.txt)
-        want_pdf = args.pdf
+        #want_html = args.html or not (args.html or args.pdf or args.md or args.txt)
+        want_html = args.html or not (args.html or args.md or args.txt)
+        #want_pdf = args.pdf
         want_md = args.md
         want_txt = args.txt
 
-        if want_pdf or want_html:
+        if want_html:
             html_path, html = generate_html(df, mode, base)
             if html_path and html:
                 print(f"Saved: {html_path}")
             else:
                 continue
-            if want_pdf:
-                pdf_path = generate_pdf(html, base)
-                if pdf_path:
-                    print(f"Saved: {pdf_path}")
-                else:
-                    print("Could not save")
+        #if want_pdf or want_html:
+        #    html_path, html = generate_html(df, mode, base)
+        #    if html_path and html:
+        #        print(f"Saved: {html_path}")
+        #    else:
+        #        continue
+        #    if want_pdf:
+        #        pdf_path = generate_pdf(html, base)
+        #        if pdf_path:
+        #            print(f"Saved: {pdf_path}")
+        #        else:
+        #            print("Could not save")
 
         if want_md:
             print(f"Saved: {generate_markdown(df, mode, base)}")
@@ -285,7 +293,7 @@ def parse_args():
     p.add_argument("-z", "--zip", nargs="+")
 
     p.add_argument("--html", action="store_true")
-    p.add_argument("--pdf", action="store_true")
+    #p.add_argument("--pdf", action="store_true")
     p.add_argument("--md", action="store_true")
     p.add_argument("--txt", action="store_true")
 
