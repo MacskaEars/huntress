@@ -4,6 +4,20 @@ import time
 import re
 import os
 
+try:
+    subprocess.check_call([
+        sys.executable, "-m", "pip", "install", "--upgrade", "pip"
+    ])
+    
+    subprocess.check_call([
+        sys.executable, "-m", "pip", "install",
+        "requests", "pandas", "numpy", "bs4"
+    ])
+    import requests
+except Exception as e:
+    print(f"There was an exception installing requirements: {str(e)}")
+    return
+
 def extract_contact_info(description):
     """Extract emails and phone numbers from job description."""
     if not description or not isinstance(description, str):
