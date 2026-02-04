@@ -4,6 +4,20 @@ import pandas as pd
 import time
 import re
 
+try:
+    subprocess.check_call([
+        sys.executable, "-m", "pip", "install", "--upgrade", "pip"
+    ])
+    
+    subprocess.check_call([
+        sys.executable, "-m", "pip", "install",
+        "requests", "pandas", "numpy", "bs4"
+    ])
+    import requests
+except Exception as e:
+    print(f"There was an exception installing requirements: {str(e)}")
+    return
+
 class HousingSearcher:
     def __init__(self, headers=None):
         self.headers = headers or {
