@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Huntress Search Engine</title>
+  <style>
+    /* ===== GLOBAL STYLES ===== */
+    :root {
+      --primary-dark: #0a0e27;
+      --primary-light: #f5f7fa;
+      --accent-jobs: #00ff00;
+      --accent-housing: #ff00ff;
+      --text-primary: #ffffff;
+      --text-secondary: #b0b8c1;
+      --border-color: #2a3f5f;
+      --bg-card: #1a2332;
+      --radius-sm: 2px;
+      --radius-md: 4px;
+      --radius-lg: 6px;
+      --transition: 0.2s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background-color: var(--primary-dark);
+      color: var(--text-primary);
+      line-height: 1.6;
+      font-weight: 400;
+    }
+
+    /* Night mode toggle via CSS filter */
+    body.night-mode,
+    body.night-mode img,
+    body.night-mode embed,
+    body.night-mode svg,
+    body.night-mode video {
+      filter: invert(100%) hue-rotate(180deg);
+    }
+
+    /* ===== TYPOGRAPHY ===== */
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+    }
+
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; }
+    h3 { font-size: 1.25rem; }
+    h4 { font-size: 1.1rem; }
+    h5 { font-size: 1rem; }
+    h6 { font-size: 0.9rem; }
+
+    p { margin-bottom: 1rem; }
+
+    strong, b {
+      font-weight: 700;
+    }
+
+    /* Small caps for navigation labels */
+    .small-caps {
+      font-variant: small-caps;
+      letter-spacing: 0.05em;
+    }
+
+    /* ===== LAYOUT ===== */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+
+    .header-controls {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    /* ===== NAVIGATION TREE ===== */
+    .nav-tree {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .nav-tree-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      padding: 0.75rem 1.5rem;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background-color: var(--bg-card);
+      color: var(--text-primary);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition);
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-button:hover:not(.disabled) {
+      border-color: var(--accent-jobs);
+      background-color: rgba(0, 255, 0, 0.1);
+    }
+
+    .nav-button.active {
+      border-color: var(--accent-jobs);
+      background-color: rgba(0, 255, 0, 0.15);
+      color: var(--accent-jobs);
+    }
+
+    .nav-button.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      color: var(--text-secondary);
+    }
+
+    .nav-separator {
+      color: var(--text-secondary);
+      font-weight: 700;
+    }
+
+    /* ===== PROFILE SETUP ===== */
+    .profile-section {
+      display: none;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .profile-section.active {
+      display: block;
+    }
+
+    .profile-disclaimer {
+      background-color: rgba(0, 255, 0, 0.1);
+      border-left: 4px solid var(--accent-jobs);
+      padding: 1rem;
+      margin-bottom: 2rem;
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+    }
+
+    .collapsible-section {
+      background-color: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+
+    .collapsible-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      cursor: pointer;
+      font-weight: 700;
+      background-color: rgba(0, 255, 0, 0.05);
+      transition: background-color var(--transition);
+    }
+
+    .collapsible-header:hover {
+      background-color: rgba(0, 255, 0, 0.1);
+    }
+
+    .collapsible-header.expanded {
+      background-color: rgba(0, 255, 0, 0.15);
+    }
+
+    .collapsible-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.2rem;
+    }
+
+    .collapsible-close {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 1.5rem;
+      padding: 0;
+      transition: color var(--transition);
+    }
+
+    .collapsible-close:hover {
+      color: var(--accent-jobs);
+    }
+
+    .collapsible-content {
+      display: none;
+      padding: 1.5rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .collapsible-content.expanded {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background-color: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: border-color var(--transition);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--accent-jobs);
+      background-color: rgba(0, 255, 0, 0.05);
+    }
+
+    .checkbox-group {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .checkbox-item input[type="checkbox"],
+    .checkbox-item input[type="radio"] {
+      width: auto;
+      cursor: pointer;
+      accent-color: var(--accent-jobs);
+    }
+
+    .checkbox-item label {
+      margin: 0;
+      cursor: pointer;
+      font-weight: 400;
+    }
+
+    .conditional-group {
+      margin-left: 2rem;
+      margin-top: 1rem;
+      padding-left: 1rem;
+      border-left: 2px solid var(--border-color);
+    }
+
+    .conditional-group.hidden {
+      display: none;
+    }
+
+    /* ===== FORM STYLES ===== */
+    .form-section {
+      display: none;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-section.active {
+      display: block;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition);
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .btn-primary {
+      background-color: var(--accent-jobs);
+      color: var(--primary-dark);
+    }
+
+    .btn-primary:hover {
+      background-color: #00dd00;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 255, 0, 0.3);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-card);
+      color: var(--text-primary);
+      border: 2px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent-jobs);
+      background-color: rgba(0, 255, 0, 0.1);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+
+    /* ===== RESULTS SECTION ===== */
+    .results-section {
+      display: none;
+    }
+
+    .results-section.active {
+      display: block;
+    }
+
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .results-controls {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .results-controls select {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background-color: var(--bg-card);
+      color: var(--text-primary);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 2rem;
+      background-color: var(--bg-card);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .results-table thead {
+      background-color: rgba(0, 255, 0, 0.1);
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .results-table th {
+      padding: 1rem;
+      text-align: left;
+      font-weight: 700;
+      color: var(--accent-jobs);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .results-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      word-break: break-word;
+    }
+
+    .results-table tbody tr:hover {
+      background-color: rgba(0, 255, 0, 0.05);
+    }
+
+    .results-table a {
+      color: var(--accent-jobs);
+      text-decoration: none;
+      font-weight: 700;
+      transition: color var(--transition);
+    }
+
+    .results-table a:hover {
+      color: #00dd00;
+      text-decoration: underline;
+    }
+
+    .result-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .result-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      gap: 1rem;
+    }
+
+    .result-card h3 {
+      margin: 0;
+      color: var(--accent-jobs);
+      flex: 1;
+    }
+
+    .result-card-meta {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .result-card-meta strong {
+      color: var(--text-primary);
+    }
+
+    .result-card-description {
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .result-card-footer {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .result-card-footer a {
+      color: var(--accent-jobs);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.9rem;
+      transition: color var(--transition);
+    }
+
+    .result-card-footer a:hover {
+      color: #00dd00;
+      text-decoration: underline;
+    }
+
+    /* ===== THEME TOGGLE ===== */
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: var(--bg-card);
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--accent-jobs);
+      background-color: rgba(0, 255, 0, 0.1);
+    }
+
+    .theme-toggle-label {
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ===== UTILITY CLASSES ===== */
+    .hidden {
+      display: none !important;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .text-muted {
+      color: var(--text-secondary);
+    }
+
+    .mt-1 { margin-top: 0.5rem; }
+    .mt-2 { margin-top: 1rem; }
+    .mt-3 { margin-top: 1.5rem; }
+    .mt-4 { margin-top: 2rem; }
+
+    .mb-1 { margin-bottom: 0.5rem; }
+    .mb-2 { margin-bottom: 1rem; }
+    .mb-3 { margin-bottom: 1.5rem; }
+    .mb-4 { margin-bottom: 2rem; }
+
+    .gap-1 { gap: 0.5rem; }
+    .gap-2 { gap: 1rem; }
+    .gap-3 { gap: 1.5rem; }
+
+    /* ===== PRINT STYLES ===== */
+    @media print {
+      body {
+        background-color: white;
+        color: black;
+        filter: none !important;
+      }
+
+      .header, .nav-tree, .results-controls, .theme-toggle, .btn-group, .profile-section {
+        display: none;
+      }
+
+      .results-section {
+        display: block !important;
+      }
+
+      .results-table,
+      .result-card {
+        background-color: white;
+        border: 1px solid #999;
+        page-break-inside: avoid;
+      }
+
+      .results-table th {
+        background-color: #f0f0f0;
+        color: black;
+      }
+
+      .results-table a,
+      .result-card-footer a {
+        color: blue;
+        text-decoration: underline;
+      }
+
+      .result-card {
+        margin-bottom: 1.5rem;
+      }
+    }
+
+    /* ===== ACCESSIBILITY ===== */
+    button:focus,
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: 2px solid var(--accent-jobs);
+      outline-offset: 2px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .header-controls {
+        width: 100%;
+      }
+
+      .nav-tree {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .nav-button {
+        width: 100%;
+        text-align: left;
+      }
+
+      .form-section {
+        padding: 1rem;
+      }
+
+      .results-table {
+        font-size: 0.85rem;
+      }
+
+      .results-table th,
+      .results-table td {
+        padding: 0.75rem;
+      }
+
+      .result-card-header {
+        flex-direction: column;
+      }
+
+      .result-card h3 {
+        margin-bottom: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <div class="header">
+      <h1>🎯 Huntress</h1>
+      <div class="header-controls">
+        <div class="theme-toggle" id="themeToggle" role="button" tabindex="0" aria-label="Toggle night mode">
+          <span class="theme-toggle-label">Night Mode</span>
+          <span id="themeIcon">🌙</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- NAVIGATION TREE -->
+    <div class="nav-tree" id="navTree">
+      <div class="nav-tree-item">
+        <button class="nav-button active" data-nav="start">Start</button>
+      </div>
+      <div class="nav-tree-item" id="jobsNavItem" style="display: none;">
+        <span class="nav-separator">/</span>
+        <button class="nav-button disabled" data-nav="jobs"><span class="small-caps">jobs</span></button>
+      </div>
+      <div class="nav-tree-item" id="housingNavItem" style="display: none;">
+        <span class="nav-separator">/</span>
+        <button class="nav-button disabled" data-nav="housing"><span class="small-caps">housing</span></button>
+      </div>
+      <div class="nav-tree-item" id="bothNavItem" style="display: none;">
+        <span class="nav-separator">/</span>
+        <button class="nav-button disabled" data-nav="both"><span class="small-caps">both</span></button>
+      </div>
+      <div class="nav-tree-item" id="resultsNavItem" style="display: none;">
+        <span class="nav-separator">/</span>
+        <button class="nav-button disabled" data-nav="results">Results</button>
+      </div>
+    </div>
+
+    <!-- PROFILE SETUP VIEW -->
+    <div class="profile-section active" id="profileSection">
+      <div class="profile-disclaimer">
+        <strong>⚠️ Privacy Notice:</strong> None of the information you enter here will be used to automatically fill out forms on external websites. This data is stored locally on your device and used only to filter and score search results to match your needs.
+      </div>
+
+      <!-- What are you looking for? -->
+      <div class="collapsible-section">
+        <div class="collapsible-header" data-section="search-goals">
+          <span>🎯 What are you looking for?</span>
+          <div class="collapsible-toggle">
+            <span id="search-goals-icon">▼</span>
+          </div>
+        </div>
+        <div class="collapsible-content" id="search-goals-content">
+          <div class="checkbox-group">
+            <div class="checkbox-item">
+              <input type="checkbox" id="lookingJobs" name="lookingFor" value="jobs">
+              <label for="lookingJobs">Jobs</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="lookingHousing" name="lookingFor" value="housing">
+              <label for="lookingHousing">Housing</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Devices -->
+      <div class="collapsible-section">
+        <div class="collapsible-header" data-section="devices">
+          <span>📱 Contact Devices</span>
+          <div class="collapsible-toggle">
+            <span id="devices-icon">▼</span>
+          </div>
+        </div>
+        <div class="collapsible-content" id="devices-content">
+          <div class="checkbox-group">
+            <div class="checkbox-item">
+              <input type="checkbox" id="hasCellPhone" name="devices" value="cellPhone">
+              <label for="hasCellPhone">Cell Phone</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="cellPhoneService" name="deviceDetails" value="cellService" disabled>
+              <label for="cellPhoneService">with service</label>
+            </div>
+          </div>
+          <div class="checkbox-group mt-2">
+            <div class="checkbox-item">
+              <input type="checkbox" id="hasHomePhone" name="devices" value="homePhone">
+              <label for="hasHomePhone">Home Phone</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Housing Status -->
+      <div class="collapsible-section">
+        <div class="collapsible-header" data-section="housing-status">
+          <span>🏠 Housing Status</span>
+          <div class="collapsible-toggle">
+            <span id="housing-status-icon">▼</span>
+          </div>
+        </div>
+        <div class="collapsible-content" id="housing-status-content">
+          <div class="form-group">
+            <label>Current Housing</label>
+            <div class="checkbox-group">
+              <div class="checkbox-item">
+                <input type="radio" id="housingPermanent" name="housingStatus" value="permanent">
+                <label for="housingPermanent">Permanent Address</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="radio" id="housingTemporary" name="housingStatus" value="temporary">
+                <label for="housingTemporary">Temporary/Unstable</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="radio" id="housingNone" name="housingStatus" value="none">
+                <label for="housingNone">No Fixed Address</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group conditional-group hidden" id="housingAddressGroup">
+            <label for="housingAddress">Address</label>
+            <input type="text" id="housingAddress" name="housingAddress" placeholder="Street, City, State, ZIP">
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobility & Transportation -->
+      <div class="collapsible-section">
+        <div class="collapsible-header" data-section="mobility">
+          <span>🚗 Mobility & Transportation</span>
+          <div class="collapsible-toggle">
+            <span id="mobility-icon">▼</span>
+          </div>
+        </div>
+        <div class="collapsible-content" id="mobility-content">
+          <div class="form-group">
+            <label>How do you get around?</label>
+            <div class="checkbox-group">
+              <div class="checkbox-item">
+                <input type="checkbox" id="canWalk" name="mobility" value="walk">
+                <label for="canWalk">Can Walk</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="canBike" name="mobility" value="bike">
+                <label for="canBike">Can Bike</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="canDrive" name="mobility" value="drive">
+                <label for="canDrive">Can Drive</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="conditional-group hidden" id="walkDistanceGroup">
+            <label for="walkDistance">How far can you walk? (miles)</label>
+            <input type="number" id="walkDistance" name="walkDistance" value="1" min="0.25" max="10" step="0.25">
+          </div>
+
+          <div class="conditional-group hidden" id="bikeDetailsGroup">
+            <div class="form-group">
+              <label for="bikeDistance">How far can you bike? (miles)</label>
+              <input type="number" id="bikeDistance" name="bikeDistance" value="5" min="1" max="50" step="1">
+            </div>
+            <div class="form-group">
+              <label>Do you have a bike?</label>
+              <div class="checkbox-group">
+                <div class="checkbox-item">
+                  <input type="radio" id="bikeOwned" name="bikeStatus" value="owned">
+                  <label for="bikeOwned">Yes, I own one</label>
+                </div>
+                <div class="checkbox-item">
+                  <input type="radio" id="bikeBorrow" name="bikeStatus" value="borrow">
+                  <label for="bikeBorrow">Can borrow/rent</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="conditional-group hidden" id="driveDetailsGroup">
+            <div class="form-group">
+              <label>Do you have a vehicle?</label>
+              <div class="checkbox-group">
+                <div class="checkbox-item">
+                  <input type="radio" id="vehicleOwned" name="vehicleStatus" value="owned">
+                  <label for="vehicleOwned">Yes, I own one</label>
+                </div>
+                <div class="checkbox-item">
+                  <input type="radio" id="vehicleBorrow" name="vehicleStatus" value="borrow">
+                  <label for="vehicleBorrow">Can borrow</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group mt-2">
+            <label>
+              <input type="checkbox" id="hasPublicTransit" name="mobility" value="transit">
+              Public Transportation Available
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Addresses -->
+      <div class="collapsible-section">
+        <div class="collapsible-header" data-section="addresses">
+          <span>📬 Addresses</span>
+          <div class="collapsible-toggle">
+            <span id="addresses-icon">▼</span>
+          </div>
+        </div>
+        <div class="collapsible-content" id="addresses-content">
+          <div class="form-group">
+            <label for="mailingAddress">Mailing Address (if different from housing)</label>
+            <input type="text" id="mailingAddress" name="mailingAddress" placeholder="Street, City, State, ZIP">
+          </div>
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="collapsible-section">
+        <div class="collapsible-header" data-section="email">
+          <span>✉️ Email Address</span>
+          <div class="collapsible-toggle">
+            <span id="email-icon">▼</span>
+          </div>
+        </div>
+        <div class="collapsible-content" id="email-content">
+          <div class="form-group">
+            <label for="emailAddress">Email <strong>*</strong></label>
+            <input type="email" id="emailAddress" name="emailAddress" placeholder="your.email@example.com" required>
+            <small class="text-muted">Required for contact</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" id="profileContinue">Continue to Search</button>
+      </div>
+    </div>
+
+    <!-- MODE SELECTION VIEW (after profile) -->
+    <div class="form-section" id="modeSelection">
+      <h2>Choose Your Path</h2>
+      <p class="text-muted">What would you like to search for?</p>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="modeJobs">
+          💼 <span class="small-caps">jobs</span>
+        </button>
+        <button class="btn btn-primary" id="modeHousing">
+          🏠 <span class="small-caps">housing</span>
+        </button>
+        <button class="btn btn-secondary" id="modeBoth">
+          🔀 <span class="small-caps">both</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- JOBS FORM -->
+    <div class="form-section" id="jobsForm">
+      <h2>💼 Job Search</h2>
+      <form id="jobsFormElement">
+        <div class="form-group">
+          <label for="jobTerms">Job Title or Keywords <strong>*</strong></label>
+          <input type="text" id="jobTerms" name="jobTerms" placeholder="e.g., Software Engineer, Data Scientist" required>
+          <small class="text-muted">Comma-separated for multiple terms</small>
+        </div>
+
+        <div class="form-group">
+          <label>Location Type <strong>*</strong></label>
+          <div class="checkbox-group">
+            <div class="checkbox-item">
+              <input type="radio" id="locGlobal" name="locationType" value="global">
+              <label for="locGlobal">Global / Remote</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="radio" id="locCountry" name="locationType" value="country">
+              <label for="locCountry">Country</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="radio" id="locState" name="locationType" value="state">
+              <label for="locState">State</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="radio" id="locZip" name="locationType" value="zip">
+              <label for="locZip">Zip Code</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group" id="jobLocationInput">
+          <label for="jobLocation">Location <strong>*</strong></label>
+          <input type="text" id="jobLocation" name="jobLocation" placeholder="Enter location">
+          <small class="text-muted">Comma-separated for multiple locations</small>
+        </div>
+
+        <div class="form-group">
+          <label>Job Type</label>
+          <div class="checkbox-group">
+            <div class="checkbox-item">
+              <input type="checkbox" id="jobRemote" name="jobRemote">
+              <label for="jobRemote">Remote Only</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="jobLocal" name="jobLocal">
+              <label for="jobLocal">Local Only</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button type="submit" class="btn btn-primary">Search <span class="small-caps">jobs</span></button>
+          <button type="button" class="btn btn-secondary" id="jobsBack">Back</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- HOUSING FORM -->
+    <div class="form-section" id="housingForm">
+      <h2>🏠 Apartment Search</h2>
+      <form id="housingFormElement">
+        <div class="form-group">
+          <label for="zipCodes">Zip Code(s) <strong>*</strong></label>
+          <input type="text" id="zipCodes" name="zipCodes" placeholder="e.g., 13815, 10001" required>
+          <small class="text-muted">Comma-separated for multiple zip codes</small>
+        </div>
+
+        <div class="form-group">
+          <label for="searchDistance">Search Distance (miles)</label>
+          <input type="number" id="searchDistance" name="searchDistance" value="20" min="1" max="100">
+        </div>
+
+        <div class="form-group">
+          <label for="maxRent">Max Monthly Rent (optional)</label>
+          <input type="number" id="maxRent" name="maxRent" placeholder="e.g., 1200">
+        </div>
+
+        <div class="form-group">
+          <label for="bedrooms">Bedrooms (optional)</label>
+          <input type="number" id="bedrooms" name="bedrooms" placeholder="e.g., 2" min="0" max="10">
+        </div>
+
+        <div class="btn-group">
+          <button type="submit" class="btn btn-primary">Search <span class="small-caps">housing</span></button>
+          <button type="button" class="btn btn-secondary" id="housingBack">Back</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- RESULTS VIEW -->
+    <div class="results-section" id="resultsSection">
+      <div class="results-header">
+        <h2 id="resultsTitle">Search Results</h2>
+        <div class="results-controls">
+          <select id="resultsSortBy">
+            <option value="relevance">Sort by Relevance</option>
+            <option value="score">Sort by Score</option>
+            <option value="date">Sort by Date</option>
+          </select>
+          <button class="btn btn-secondary" id="resultsExport">Export CSV</button>
+          <button class="btn btn-secondary" id="resultsPrint">Print</button>
+          <button class="btn btn-secondary" id="resultsBack">Back</button>
+        </div>
+      </div>
+
+      <div id="resultsContainer">
+        <!-- Results will be rendered here -->
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    // ===== APP STATE =====
+    const AppState = {
+      profile: {
+        lookingFor: [], // ['jobs', 'housing']
+        devices: {
+          cellPhone: false,
+          cellPhoneService: false,
+          homePhone: false
+        },
+        housing: {
+          status: null, // 'permanent', 'temporary', 'none'
+          address: null
+        },
+        mobility: {
+          canWalk: false,
+          walkDistance: 1,
+          canBike: false,
+          bikeDistance: 5,
+          bikeStatus: null,
+          canDrive: false,
+          vehicleStatus: null,
+          hasPublicTransit: false
+        },
+        addresses: {
+          mailing: null
+        },
+        email: null
+      },
+      mode: null, // 'jobs', 'apartments', 'both'
+      currentView: 'profile', // 'profile', 'selection', 'form', 'results'
+      jobSearch: {
+        terms: [],
+        locations: [],
+        locationType: 'global',
+        filters: {
+          remote: false,
+          local: false
+        }
+      },
+      housingSearch: {
+        zipCodes: [],
+        distance: 20,
+        maxRent: null,
+        bedrooms: null
+      },
+      results: {
+        jobs: [],
+        apartments: []
+      },
+      nightMode: localStorage.getItem('huntress-night-mode') === 'true'
+    };
+
+    // ===== UTILITY MODULE =====
+    const Utilities = {
+      emailPattern: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,
+      phonePattern: /\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g,
+
+      extractEmails(text) {
+        if (!text || typeof text !== 'string') return [];
+        const matches = text.match(this.emailPattern) || [];
+        return [...new Set(matches)];
+      },
+
+      extractPhones(text) {
+        if (!text || typeof text !== 'string') return [];
+        const matches = text.match(this.phonePattern) || [];
+        return [...new Set(matches)];
+      },
+
+      extractContactInfo(text) {
+        const emails = this.extractEmails(text);
+        const phones = this.extractPhones(text);
+        const contacts = [...emails, ...phones];
+        return contacts.length > 0 ? contacts.join(', ') : 'No direct contact found';
+      },
+
+      parseCommaSeparated(str) {
+        return str
+          .split(',')
+          .map(s => s.trim())
+          .filter(s => s.length > 0);
+      },
+
+      generateCSV(data, headers) {
+        let csv = headers.join(',') + '\n';
+        data.forEach(row => {
+          const values = headers.map(header => {
+            const value = row[header] || '';
+            const escaped = String(value).replace(/"/g, '""');
+            return `"${escaped}"`;
+          });
+          csv += values.join(',') + '\n';
+        });
+        return csv;
+      },
+
+      downloadCSV(csv, filename) {
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+
+      saveProfile() {
+        localStorage.setItem('huntress-profile', JSON.stringify(AppState.profile));
+      },
+
+      loadProfile() {
+        const saved = localStorage.getItem('huntress-profile');
+        if (saved) {
+          try {
+            AppState.profile = JSON.parse(saved);
+          } catch (e) {
+            console.error('Failed to load profile:', e);
+          }
+        }
+      }
+    };
+
+    // ===== THEME MODULE =====
+    const ThemeModule = {
+      init() {
+        this.applyTheme(AppState.nightMode);
+        $('#themeToggle').on('click', () => this.toggle());
+        $(document).on('keydown', (e) => {
+          if ((e.ctrlKey || e.metaKey) && e.key === 't') {
+            e.preventDefault();
+            this.toggle();
+          }
+        });
+      },
+
+      toggle() {
+        AppState.nightMode = !AppState.nightMode;
+        localStorage.setItem('huntress-night-mode', AppState.nightMode);
+        this.applyTheme(AppState.nightMode);
+      },
+
+      applyTheme(isNightMode) {
+        if (isNightMode) {
+          $('body').addClass('night-mode');
+          $('#themeIcon').text('☀️');
+        } else {
+          $('body').removeClass('night-mode');
+          $('#themeIcon').text('🌙');
+        }
+      }
+    };
+
+    // ===== COLLAPSIBLE MODULE =====
+    const CollapsibleModule = {
+      init() {
+        $(document).on('click', '.collapsible-header', (e) => {
+          const section = $(e.currentTarget).data('section');
+          this.toggle(section);
+        });
+
+        $(document).on('click', '.collapsible-close', (e) => {
+          e.stopPropagation();
+          const section = $(e.currentTarget).closest('.collapsible-section').find('.collapsible-header').data('section');
+          this.collapse(section);
+        });
+      },
+
+      toggle(section) {
+        const header = $(`[data-section="${section}"]`);
+        const content = $(`#${section}-content`);
+        const icon = $(`#${section}-icon`);
+
+        if (content.hasClass('expanded')) {
+          this.collapse(section);
+        } else {
+          this.expand(section);
+        }
+      },
+
+      expand(section) {
+        const header = $(`[data-section="${section}"]`);
+        const content = $(`#${section}-content`);
+        const icon = $(`#${section}-icon`);
+
+        header.addClass('expanded');
+        content.addClass('expanded');
+        icon.text('▲');
+      },
+
+      collapse(section) {
+        const header = $(`[data-section="${section}"]`);
+        const content = $(`#${section}-content`);
+        const icon = $(`#${section}-icon`);
+
+        header.removeClass('expanded');
+        content.removeClass('expanded');
+        icon.text('▼');
+      }
+    };
+
+    // ===== PROFILE MODULE =====
+    const ProfileModule = {
+      init() {
+        // Looking for
+        $(document).on('change', 'input[name="lookingFor"]', () => this.updateProfile());
+
+        // Devices
+        $(document).on('change', '#hasCellPhone', () => {
+          $('#cellPhoneService').prop('disabled', !$('#hasCellPhone').is(':checked'));
+          this.updateProfile();
+        });
+        $(document).on('change', 'input[name="deviceDetails"], #hasHomePhone', () => this.updateProfile());
+
+        // Housing status
+        $(document).on('change', 'input[name="housingStatus"]', () => {
+          const status = $('input[name="housingStatus"]:checked').val();
+          if (status === 'permanent' || status === 'temporary') {
+            $('#housingAddressGroup').removeClass('hidden');
+          } else {
+            $('#housingAddressGroup').addClass('hidden');
+          }
+          this.updateProfile();
+        });
+        $(document).on('change', '#housingAddress', () => this.updateProfile());
+
+        // Mobility
+        $(document).on('change', '#canWalk', () => {
+          $('#walkDistanceGroup').toggleClass('hidden', !$('#canWalk').is(':checked'));
+          this.updateProfile();
+        });
+        $(document).on('change', '#canBike', () => {
+          $('#bikeDetailsGroup').toggleClass('hidden', !$('#canBike').is(':checked'));
+          this.updateProfile();
+        });
+        $(document).on('change', '#canDrive', () => {
+          $('#driveDetailsGroup').toggleClass('hidden', !$('#canDrive').is(':checked'));
+          this.updateProfile();
+        });
+        $(document).on('change', '#walkDistance, #bikeDistance, input[name="bikeStatus"], input[name="vehicleStatus"], #hasPublicTransit', () => this.updateProfile());
+
+        // Addresses
+        $(document).on('change', '#mailingAddress', () => this.updateProfile());
+
+        // Email
+        $(document).on('change', '#emailAddress', () => this.updateProfile());
+
+        // Continue button
+        $('#profileContinue').on('click', () => this.validateAndContinue());
+
+        // Load saved profile
+        Utilities.loadProfile();
+        this.renderProfile();
+      },
+
+      updateProfile() {
+        AppState.profile.lookingFor = $('input[name="lookingFor"]:checked').map((_, el) => $(el).val()).get();
+        AppState.profile.devices.cellPhone = $('#hasCellPhone').is(':checked');
+        AppState.profile.devices.cellPhoneService = $('#cellPhoneService').is(':checked');
+        AppState.profile.devices.homePhone = $('#hasHomePhone').is(':checked');
+        AppState.profile.housing.status = $('input[name="housingStatus"]:checked').val();
+        AppState.profile.housing.address = $('#housingAddress').val();
+        AppState.profile.mobility.canWalk = $('#canWalk').is(':checked');
+        AppState.profile.mobility.walkDistance = parseFloat($('#walkDistance').val()) || 1;
+        AppState.profile.mobility.canBike = $('#canBike').is(':checked');
+        AppState.profile.mobility.bikeDistance = parseInt($('#bikeDistance').val()) || 5;
+        AppState.profile.mobility.bikeStatus = $('input[name="bikeStatus"]:checked').val();
+        AppState.profile.mobility.canDrive = $('#canDrive').is(':checked');
+        AppState.profile.mobility.vehicleStatus = $('input[name="vehicleStatus"]:checked').val();
+        AppState.profile.mobility.hasPublicTransit = $('#hasPublicTransit').is(':checked');
+        AppState.profile.addresses.mailing = $('#mailingAddress').val();
+        AppState.profile.email = $('#emailAddress').val();
+
+        Utilities.saveProfile();
+      },
+
+      renderProfile() {
+        // Restore checkboxes
+        AppState.profile.lookingFor.forEach(val => {
+          $(`input[name="lookingFor"][value="${val}"]`).prop('checked', true);
+        });
+
+        $('#hasCellPhone').prop('checked', AppState.profile.devices.cellPhone);
+        $('#cellPhoneService').prop('checked', AppState.profile.devices.cellPhoneService).prop('disabled', !AppState.profile.devices.cellPhone);
+        $('#hasHomePhone').prop('checked', AppState.profile.devices.homePhone);
+
+        if (AppState.profile.housing.status) {
+          $(`input[name="housingStatus"][value="${AppState.profile.housing.status}"]`).prop('checked', true);
+          if (AppState.profile.housing.status === 'permanent' || AppState.profile.housing.status === 'temporary') {
+            $('#housingAddressGroup').removeClass('hidden');
+          }
+        }
+        $('#housingAddress').val(AppState.profile.housing.address || '');
+
+        $('#canWalk').prop('checked', AppState.profile.mobility.canWalk);
+        if (AppState.profile.mobility.canWalk) $('#walkDistanceGroup').removeClass('hidden');
+        $('#walkDistance').val(AppState.profile.mobility.walkDistance);
+
+        $('#canBike').prop('checked', AppState.profile.mobility.canBike);
+        if (AppState.profile.mobility.canBike) $('#bikeDetailsGroup').removeClass('hidden');
+        $('#bikeDistance').val(AppState.profile.mobility.bikeDistance);
+        if (AppState.profile.mobility.bikeStatus) {
+          $(`input[name="bikeStatus"][value="${AppState.profile.mobility.bikeStatus}"]`).prop('checked', true);
+        }
+
+        $('#canDrive').prop('checked', AppState.profile.mobility.canDrive);
+        if (AppState.profile.mobility.canDrive) $('#driveDetailsGroup').removeClass('hidden');
+        if (AppState.profile.mobility.vehicleStatus) {
+          $(`input[name="vehicleStatus"][value="${AppState.profile.mobility.vehicleStatus}"]`).prop('checked', true);
+        }
+
+        $('#hasPublicTransit').prop('checked', AppState.profile.mobility.hasPublicTransit);
+
+        $('#mailingAddress').val(AppState.profile.addresses.mailing || '');
+        $('#emailAddress').val(AppState.profile.email || '');
+      },
+
+      validateAndContinue() {
+        if (!AppState.profile.email) {
+          alert('Please enter an email address');
+          return;
+        }
+
+        if (AppState.profile.lookingFor.length === 0) {
+          alert('Please select what you are looking for');
+          return;
+        }
+
+        AppState.currentView = 'selection';
+        NavigationModule.updateView();
+      }
+    };
+
+    // ===== NAVIGATION MODULE =====
+    const NavigationModule = {
+      init() {
+        $(document).on('click', '.nav-button:not(.disabled)', (e) => {
+          const nav = $(e.target).closest('.nav-button').data('nav');
+          this.navigate(nav);
+        });
+      },
+
+      navigate(view) {
+        if (view === 'start') {
+          AppState.currentView = 'profile';
+          AppState.mode = null;
+        } else if (view === 'jobs') {
+          AppState.currentView = 'form';
+          AppState.mode = 'jobs';
+        } else if (view === 'housing') {
+          AppState.currentView = 'form';
+          AppState.mode = 'apartments';
+        } else if (view === 'both') {
+          AppState.currentView = 'form';
+          AppState.mode = 'both';
+        } else if (view === 'results') {
+          AppState.currentView = 'results';
+        }
+
+        this.updateView();
+      },
+
+      updateView() {
+        // Hide all sections
+        $('.profile-section, .form-section, .results-section').removeClass('active');
+
+        // Update navigation tree
+        $('#jobsNavItem, #housingNavItem, #bothNavItem, #resultsNavItem').hide();
+        $('[data-nav="start"]').removeClass('active disabled');
+
+        if (AppState.currentView === 'profile') {
+          $('[data-nav="start"]').addClass('active');
+          $('#profileSection').addClass('active');
+        } else if (AppState.currentView === 'selection') {
+          $('[data-nav="start"]').addClass('active');
+          $('#modeSelection').addClass('active');
+        } else if (AppState.currentView === 'form') {
+          $('[data-nav="start"]').addClass('active');
+
+          if (AppState.mode === 'jobs') {
+            $('#jobsNavItem').show();
+            $('[data-nav="jobs"]').removeClass('disabled active').addClass('active');
+            $('#jobsForm').addClass('active');
+          } else if (AppState.mode === 'apartments') {
+            $('#housingNavItem').show();
+            $('[data-nav="housing"]').removeClass('disabled active').addClass('active');
+            $('#housingForm').addClass('active');
+          } else if (AppState.mode === 'both') {
+            $('#bothNavItem').show();
+            $('[data-nav="both"]').removeClass('disabled active').addClass('active');
+            $('#modeSelection').addClass('active');
+          }
+        } else if (AppState.currentView === 'results') {
+          $('[data-nav="start"]').addClass('active');
+
+          if (AppState.mode === 'jobs') {
+            $('#jobsNavItem, #resultsNavItem').show();
+            $('[data-nav="jobs"]').removeClass('disabled').addClass('active');
+            $('[data-nav="results"]').removeClass('disabled').addClass('active');
+          } else if (AppState.mode === 'apartments') {
+            $('#housingNavItem, #resultsNavItem').show();
+            $('[data-nav="housing"]').removeClass('disabled').addClass('active');
+            $('[data-nav="results"]').removeClass('disabled').addClass('active');
+          }
+
+          $('#resultsSection').addClass('active');
+        }
+      }
+    };
+
+    // ===== FORM MODULE =====
+    const FormModule = {
+      init() {
+        // Mode selection
+        $('#modeJobs').on('click', () => this.selectMode('jobs'));
+        $('#modeHousing').on('click', () => this.selectMode('apartments'));
+        $('#modeBoth').on('click', () => this.selectMode('both'));
+
+        // Back buttons
+        $('#jobsBack, #housingBack').on('click', () => this.goBack());
+
+        // Job form
+        $('#jobsFormElement').on('submit', (e) => {
+          e.preventDefault();
+          this.submitJobsForm();
+        });
+
+        // Location type change
+        $('input[name="locationType"]').on('change', (e) => {
+          this.updateLocationLabel($(e.target).val());
+        });
+
+        // Housing form
+        $('#housingFormElement').on('submit', (e) => {
+          e.preventDefault();
+          this.submitHousingForm();
+        });
+      },
+
+      selectMode(mode) {
+        AppState.mode = mode;
+        if (mode === 'both') {
+          AppState.currentView = 'selection';
+        } else {
+          AppState.currentView = 'form';
+        }
+        NavigationModule.updateView();
+      },
+
+      goBack() {
+        AppState.currentView = 'selection';
+        NavigationModule.updateView();
+      },
+
+      updateLocationLabel(type) {
+        let label = 'Location';
+        let placeholder = 'Enter location';
+
+        if (type === 'country') {
+          label = 'Country';
+          placeholder = 'e.g., USA, Canada';
+        } else if (type === 'state') {
+          label = 'State(s)';
+          placeholder = 'e.g., NY, CA';
+        } else if (type === 'zip') {
+          label = 'Zip Code(s)';
+          placeholder = 'e.g., 10001, 90210';
+        }
+
+        $('#jobLocation').attr('placeholder', placeholder);
+        $('#jobLocationInput label').text(label + ' *');
+      },
+
+      submitJobsForm() {
+        const terms = Utilities.parseCommaSeparated($('#jobTerms').val());
+        const location = $('#jobLocation').val().trim();
+        const locationType = $('input[name="locationType"]:checked').val();
+
+        if (!terms.length || !location) {
+          alert('Please fill in all required fields');
+          return;
+        }
+
+        AppState.jobSearch.terms = terms;
+        AppState.jobSearch.locations = Utilities.parseCommaSeparated(location);
+        AppState.jobSearch.locationType = locationType;
+        AppState.jobSearch.filters.remote = $('#jobRemote').is(':checked');
+        AppState.jobSearch.filters.local = $('#jobLocal').is(':checked');
+
+        DataModule.generateJobResults();
+        AppState.currentView = 'results';
+        NavigationModule.updateView();
+        ResultsModule.render();
+      },
+
+      submitHousingForm() {
+        const zips = Utilities.parseCommaSeparated($('#zipCodes').val());
+
+        if (!zips.length) {
+          alert('Please enter at least one zip code');
+          return;
+        }
+
+        AppState.housingSearch.zipCodes = zips;
+        AppState.housingSearch.distance = parseInt($('#searchDistance').val()) || 20;
+        AppState.housingSearch.maxRent = $('#maxRent').val() ? parseInt($('#maxRent').val()) : null;
+        AppState.housingSearch.bedrooms = $('#bedrooms').val() ? parseInt($('#bedrooms').val()) : null;
+
+        DataModule.generateHousingResults();
+        AppState.currentView = 'results';
+        NavigationModule.updateView();
+        ResultsModule.render();
+      }
+    };
+
+    // ===== DATA MODULE =====
+    const DataModule = {
+      generateJobResults() {
+        const mockJobs = [
+          {
+            title: 'Senior Software Engineer',
+            company: 'Tech Corp',
+            location: 'San Francisco, CA',
+            is_remote: true,
+            job_url: 'https://example.com/job/1',
+            description: 'We are looking for a senior engineer. Contact: jobs@techcorp.com or (555) 123-4567',
+            contact_info: 'jobs@techcorp.com, (555) 123-4567',
+            search_origin: AppState.jobSearch.terms[0] + ' | ' + AppState.jobSearch.locations[0],
+            score: 85,
+            date: new Date()
+          },
+          {
+            title: 'Full Stack Developer',
+            company: 'StartUp Inc',
+            location: 'New York, NY',
+            is_remote: false,
+            job_url: 'https://example.com/job/2',
+            description: 'Join our growing team. Email: careers@startup.com',
+            contact_info: 'careers@startup.com',
+            search_origin: AppState.jobSearch.terms[0] + ' | ' + AppState.jobSearch.locations[0],
+            score: 72,
+            date: new Date(Date.now() - 86400000)
+          },
+          {
+            title: 'DevOps Engineer',
+            company: 'Cloud Systems',
+            location: 'Remote',
+            is_remote: true,
+            job_url: 'https://example.com/job/3',
+            description: 'Remote position. Apply at: apply@cloudsystems.com',
+            contact_info: 'apply@cloudsystems.com',
+            search_origin: AppState.jobSearch.terms[0] + ' | ' + AppState.jobSearch.locations[0],
+            score: 78,
+            date: new Date(Date.now() - 172800000)
+          }
+        ];
+
+        AppState.results.jobs = mockJobs;
+      },
+
+      generateHousingResults() {
+        const mockApartments = [
+          {
+            title: '2BR/1BA Apartment - Downtown',
+            price: '$1,200/month',
+            location: 'Near ' + AppState.housingSearch.zipCodes[0],
+            job_url: 'https://example.com/apt/1',
+            description: 'Spacious apartment with utilities included. DSS welcome.',
+            company: 'Private Landlord',
+            contact_info: 'Check listing link',
+            score: 85,
+            date: new Date()
+          },
+          {
+            title: '1BR/1BA Studio',
+            price: '$950/month',
+            location: 'Near ' + AppState.housingSearch.zipCodes[0],
+            job_url: 'https://example.com/apt/2',
+            description: 'Cozy studio, all utilities included.',
+            company: 'Property Management',
+            contact_info: 'Check listing link',
+            score: 78,
+            date: new Date(Date.now() - 86400000)
+          },
+          {
+            title: '3BR/2BA House',
+            price: '$1,500/month',
+            location: 'Near ' + AppState.housingSearch.zipCodes[0],
+            job_url: 'https://example.com/apt/3',
+            description: 'House with yard. Section 8 accepted.',
+            company: 'Landlord Direct',
+            contact_info: 'Check listing link',
+            score: 88,
+            date: new Date(Date.now() - 172800000)
+          }
+        ];
+
+        AppState.results.apartments = mockApartments;
+      }
+    };
+
+    // ===== RESULTS MODULE =====
+    const ResultsModule = {
+      init() {
+        $(document).on('click', '#resultsBack', () => {
+          AppState.currentView = 'form';
+          NavigationModule.updateView();
+        });
+
+        $(document).on('change', '#resultsSortBy', (e) => {
+          this.sort($(e.target).val());
+        });
+
+        $(document).on('click', '#resultsExport', () => {
+          this.exportCSV();
+        });
+
+        $(document).on('click', '#resultsPrint', () => {
+          window.print();
+        });
+      },
+
+      render() {
+        const results = AppState.mode === 'jobs' ? AppState.results.jobs : AppState.results.apartments;
+        const isJobs = AppState.mode === 'jobs';
+
+        $('#resultsTitle').text(isJobs ? 'Job Search Results' : 'Apartment Search Results');
+
+        let html = '';
+        if (results.length === 0) {
+          html = '<p class="text-center text-muted">No results found. Try adjusting your search criteria.</p>';
+        } else {
+          results.forEach(result => {
+            html += this.renderResultCard(result, isJobs);
+          });
+        }
+
+        $('#resultsContainer').html(html);
+      },
+
+      renderResultCard(result, isJobs) {
+        const scoreHtml = result.score ? `<span style="color: ${result.score > 80 ? '#00ff00' : '#ffaa00'}; font-weight: 700;">Score: ${result.score}/100</span>` : '';
+
+        return `
+          <div class="result-card">
+            <div class="result-card-header">
+              <h3>${result.title}</h3>
+              ${scoreHtml}
+            </div>
+            <div class="result-card-meta">
+              <div><strong>${isJobs ? 'Company' : 'Price'}:</strong> ${isJobs ? result.company : result.price}</div>
+              <div><strong>Location:</strong> ${result.location}</div>
+              <div><strong>Contact:</strong> ${result.contact_info}</div>
+            </div>
+            <div class="result-card-description">${result.description}</div>
+            <div class="result-card-footer">
+              <a href="${result.job_url}" target="_blank">View Listing →</a>
+            </div>
+          </div>
+        `;
+      },
+
+      sort(sortBy) {
+        const results = AppState.mode === 'jobs' ? AppState.results.jobs : AppState.results.apartments;
+
+        if (sortBy === 'score') {
+          results.sort((a, b) => (b.score || 0) - (a.score || 0));
+        } else if (sortBy === 'date') {
+          results.sort((a, b) => new Date(b.date) - new Date(a.date));
+        }
+
+        this.render();
+      },
+
+      exportCSV() {
+        const results = AppState.mode === 'jobs' ? AppState.results.jobs : AppState.results.apartments;
+        const headers = AppState.mode === 'jobs'
+          ? ['title', 'company', 'location', 'is_remote', 'contact_info', 'job_url']
+          : ['title', 'price', 'location', 'contact_info', 'job_url'];
+
+        const csv = Utilities.generateCSV(results, headers);
+        const filename = `${AppState.mode}-results-${new Date().toISOString().split('T')[0]}.csv`;
+        Utilities.downloadCSV(csv, filename);
+      }
+    };
+
+    // ===== INITIALIZATION =====
+    $(document).ready(() => {
+      ThemeModule.init();
+      CollapsibleModule.init();
+      ProfileModule.init();
+      NavigationModule.init();
+      FormModule.init();
+      ResultsModule.init();
+
+      // Set default location type
+      $('#locGlobal').prop('checked', true);
+    });
+  </script>
+</body>
+</html>
